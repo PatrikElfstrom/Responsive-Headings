@@ -1,6 +1,6 @@
 (function(){
 
-    const responsiveHeadings = function() {
+    const responsiveText = function() {
 
         function getRealWidth( element ) {
             const elementPosition = element.style.position; // get position
@@ -42,8 +42,8 @@
             const elementWidth = element.offsetWidth; // Desired width
             let newElementWidth = getRealWidth( element ); // get current width
 
-            element.classList.remove("responsiveHeadings-complete");
-            element.classList.add("responsiveHeadings-loading");
+            element.classList.remove("responsiveText-complete");
+            element.classList.add("responsiveText-loading");
 
             // returns fontsize if exact fontsize was found otherwise -1
             // We dont need the return since the last tested is always the closest
@@ -61,8 +61,8 @@
                 return newElementWidth === elementWidth;
             });
 
-            element.classList.remove("responsiveHeadings-loading");
-            element.classList.add("responsiveHeadings-complete");
+            element.classList.remove("responsiveText-loading");
+            element.classList.add("responsiveText-complete");
         };
 
         if (this.length) {
@@ -76,7 +76,7 @@
         return this;
     };
 
-    Element.prototype.responsiveHeadings = responsiveHeadings;
-    HTMLCollection.prototype.responsiveHeadings = responsiveHeadings;
+    Element.prototype.responsiveText = responsiveText;
+    HTMLCollection.prototype.responsiveText = responsiveText;
 
 })();

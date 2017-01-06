@@ -1,9 +1,9 @@
-# Responsive Headings
+# Responsive text
 
 A responsive "fittext" script that is calculating the required font size to get the desired width of the element and sets that using the vw unit so that no window resize events is necessary.
 
 ## Download and Install:
-Download [responsive-headings.js](https://raw.githubusercontent.com/PatrikElfstrom/Responsive-Headings/master/responsive-headings.js) and place responsive-headings.js in your project.
+Download [responsive-text.js](https://raw.githubusercontent.com/PatrikElfstrom/Responsive-text/master/responsive-text.js) and place responsive-text.js in your project.
 
 ## Usage:
 white-space: nowrap is required for it to work correctly. You can use `<br/>` to get line breaks.
@@ -12,9 +12,9 @@ white-space: nowrap is required for it to work correctly. You can use `<br/>` to
     h1 { white-space: nowrap; }
 </style>
 <h1>Say the magic words,<br/> Fat Gandalf.</h1>
-<script type="text/javascript" src="responsive-headings.js"></script>
+<script type="text/javascript" src="responsive-text.js"></script>
 <script type="text/javascript">
-    document.getElementsByTagName('h1').responsiveHeadings();
+    document.getElementsByTagName('h1').responsiveText();
 </script>
 ```
 
@@ -25,11 +25,11 @@ Since Google Fonts needs to load before we do the calculation we need to use [We
     h1 { white-space: nowrap; }
 </style>
 <h1>Say the magic words,<br/> Fat Gandalf.</h1>
-<script type="text/javascript" src="responsive-headings.js"></script>
+<script type="text/javascript" src="responsive-text.js"></script>
 <script type="text/javascript">
     WebFontConfig = {
         active: function() {
-            document.getElementsByTagName('h1').responsiveHeadings();
+            document.getElementsByTagName('h1').responsiveText();
         },
         google: {
             families: ['Open Sans']
