@@ -1,12 +1,14 @@
 # Responsive text
 
-A responsive "fittext" script that is calculating the required font size to get the desired width of the element and sets that using the vw unit so that no window resize events is necessary.
+A responsive "fittext" script that is calculating the required font size based on the size of the parent element. Can be used with the vw (viewport width) unit so that no resize events have to be used.
 
 ## Download and Install:
-Download [responsive-text.js](https://raw.githubusercontent.com/PatrikElfstrom/Responsive-text/master/responsive-text.js) and place responsive-text.js in your project.
+Download [responsive-text.js](https://raw.githubusercontent.com/PatrikElfstrom/responsive-text/master/dist/responsive-text.js) and place responsive-text.js in your project.
 
 ## Usage:
-white-space: nowrap is required for it to work correctly. You can use `<br/>` to get line breaks.
+`white-space: nowrap;` is required for it to work correctly. You can use `<br />` to get line breaks.
+
+### Without resize event
 ```html
 <style>
     h1 { white-space: nowrap; }
@@ -14,12 +16,13 @@ white-space: nowrap is required for it to work correctly. You can use `<br/>` to
 <h1>Say the magic words,<br/> Fat Gandalf.</h1>
 <script type="text/javascript" src="responsive-text.js"></script>
 <script type="text/javascript">
-    document.getElementsByTagName('h1').responsiveText();
+    var element = document.querySelector('h1');
+    new responsiveText({
+        unit: 'vw',
+    }, element).init();
 </script>
 ```
-
-### With Google Fonts:  
-Since Google Fonts needs to load before we do the calculation we need to use [Web Font Loader](https://github.com/typekit/webfontloader) so we can get a callback when Google Fonts has loaded.
+### With resize event
 ```html
 <style>
     h1 { white-space: nowrap; }
@@ -27,36 +30,72 @@ Since Google Fonts needs to load before we do the calculation we need to use [We
 <h1>Say the magic words,<br/> Fat Gandalf.</h1>
 <script type="text/javascript" src="responsive-text.js"></script>
 <script type="text/javascript">
-    WebFontConfig = {
-        active: function() {
-            document.getElementsByTagName('h1').responsiveText();
-        },
-        google: {
-            families: ['Open Sans']
-        }
-    };
-    (function(d) {
-        var wf = d.createElement('script'), s = d.scripts[0];
-        wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.16/webfont.js';
-        s.parentNode.insertBefore(wf, s);
-    })(document);
+    var element = document.querySelector('h1');
+    var responsiveText = new responsiveText(element)
+    
+    responsiveText.init();
+    
+    window.addEventListener('resize', function() {
+        responsiveText.init();
+    });
 </script>
 ```
 
+## Options
+### unit
+Define your own font-size unit.
+Default: `'px'`
+### targetSize
+Define your own target size.
+Needs to be an object with width and height.
+```
+{
+    width: 100, 
+    height: 100
+}
+```
+Defaults to check the parents size.
+Default: `{}`
+### min
+The minimum binary search range.
+Default: `0`
+### max
+The maximum binary search range.
+Default: `1000000000`
+### divider
+How much to divide the guess to get the correct font-size.
+Default: `100000`
+### length
+The float floor exponent (the 10 logarithm of the adjustment base).
+Read more: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
+Default: `-6`
+### comparator
+A custom comparator used to test if the guessed font-size is correct.
+Example:
+```JavaScript
+(guess, min, max) => {
+    guess = guess / divider;
+    
+    element.style.fontSize = guess + 'vw';
 
-## How does it work?
-It works simply by calculating the required font size to get the desired width of the element.  
+    // Let the font-size set the size of the element
+    // then return the new width of the element
+    let currentElementWidth = getCurrentElementWidth(); 
 
-1. Get the desired width of the element  
-This is done by temporarily setting the element position to absolute.  
-  
-2. Calculate the required font size  
-This is done by doing a binary search to find a font size where the element width is equal to the desired width  
-  
-3. Set the calculated font size  
-The calculated font size is set with the vw unit. This to avoid the need to do any calculations during resize of the window.  
-  
-Since vw is relative to the width of the viewport (100vw = 100% viewport width) we don't have to change the font size during window resize. 15% of the viewport is always 15% of the viewport.
-
-## Known issues:  
-* If the window has an vertical scrollbar the text won't scale properly. It will be off by around 100px per 1000px.
+    // if the current element width is equal to the target width
+    // we've found the correct font-size.
+    // If not, test if the current size is too big or too small
+    if(currentElementWidth === targetElementWidth) {
+        return 1;
+    } else {
+        return currentElementWidth < targetElementWidth;
+    }
+}
+```
+Default: `null`
+### checkHeight
+If the height of the element should be considered.
+Default: `true`
+### checkWidth
+If the width of the element should be considered.
+Default: `true`

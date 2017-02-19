@@ -1,0 +1,39 @@
+{
+  "name": "responsive-text",
+  "version": "2.0.0",
+  "description": "A responsive text script without resize events.",
+  "main": "responsive-text.js",
+  "scripts": {
+    "uglify": "uglifyjs ./dist/responsive-text.js -mc dead_code=true,conditionals=true,booleans=true,unused=true,if_return=true,join_vars=true,drop_console=true -o ./dist/responsive-text.min.js",
+    "babel": "babel responsive-text.js -d dist",
+    "build": "npm run babel; npm run uglify"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PatrikElfstrom/responsive-text.git"
+  },
+  "author": "Patrik Elfström <me@patrikelfstrom.se>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PatrikElfstrom/responsive-text/issues"
+  },
+  "homepage": "https://github.com/PatrikElfstrom/responsive-text#readme",
+  "devDependencies": {
+    "babel-cli": "^6.23.0",
+    "babel-preset-env": "^1.1.8",
+    "uglify-js": "git://github.com/mishoo/UglifyJS2.git#harmony"
+  },
+  "babel": {
+        "presets": [
+            ["env", {
+                "targets": {
+                    "browsers": [
+                        "last 2 versions", 
+                        "ie >= 9"
+                    ]
+                },
+                "modules": false
+            }]
+        ]
+    }
+}

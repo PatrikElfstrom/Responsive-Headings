@@ -1,0 +1,79 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <title>Responsive text</title>
+        <meta name="description" content="A responsive \"fittext\" script that is calculating the required font size to get the desired width of the element and sets that using the vw unit so that no window resize events is necessary.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="style.css">
+        <script src="responsive-text.js"></script>
+    </head>
+    <body>
+
+        <div class="row">
+
+            <div class="column">
+                <div class="example example-1">
+                    <p>Hello</p>
+                </div>
+            </div>
+
+            <div class="column">
+                <div class="example example-2">
+                    <p>World</p>
+                </div>
+            </div>
+
+            <div class="column">
+                <div class="example example-3">
+                    <p>!</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="other example example-4">
+            <h1>– Say the magic words,<br/> Fat Gandalf.</h1>
+        </div>
+
+        <script>
+            // Select elements to manipulate
+            var elements = document.querySelectorAll('.example > *');
+
+            // You can an event listener to an element
+            // to check when responsiveText is done
+            document.querySelector('.example-2 p').addEventListener('done', function(e) {
+                console.log('done', e.detail.fontSize + 'px');
+            });
+
+            // Create a new instance of responsiveText
+            // All settings are optional
+            var responsiveText = new responsiveText(elements, {
+                unit: 'px',
+                targetSize: function() {
+                    return {
+                        width: 10,
+                        height: 10
+                    }
+                },
+                min: 0,
+                max: 1000000000,
+                divider: 100000,
+                length: -6,
+                comparator: null,
+                checkHeight: true,
+                checkWidth: true
+            });
+
+            // Initiate responsiveText
+            responsiveText.init();
+
+            // Either use vw as unit to get responsive width
+            // or can add an event listener to resize
+            window.addEventListener('resize', function() {
+                responsiveText.init();
+            });
+        </script>
+    </body>
+</html>
