@@ -1,33 +1,77 @@
 # Responsive text
 
-A responsive "fittext" script that is calculating the required font size based on the size of the parent element. Can be used with the vw (viewport width) unit so that no resize events have to be used.
+A responsive "fittext" script that is calculating the required font size based on the size of the parent element.
+Can be used with the viewport width unit so that no resize events have to be used.
 
 ## Download and Install:
 Download [responsive-text.js](https://raw.githubusercontent.com/PatrikElfstrom/responsive-text/master/dist/responsive-text.js) and place responsive-text.js in your project.
 
 ## Usage:
 `white-space: nowrap;` is required for it to work correctly. You can use `<br />` to get line breaks.
+The parent element needs some form of height and width.
 
-### Without resize event
 ```html
 <style>
+    .parent { width: 500px; height: 500px; }
     h1 { white-space: nowrap; }
 </style>
-<h1>Say the magic words,<br/> Fat Gandalf.</h1>
+
+<div class="parent">
+    <h1>Gandalf the Grey</h1>
+</div>
+
 <script type="text/javascript" src="responsive-text.js"></script>
 <script type="text/javascript">
     var element = document.querySelector('h1');
-    new responsiveText({
-        unit: 'vw',
-    }, element).init();
+    new responsiveText(element).init();
 </script>
 ```
-### With resize event
+
+### Autoresizing text without resize event
+With the use of the `vw` (or `vh`) unit we can get autoresizing text without the need of an resize event.
 ```html
 <style>
+    html,body {
+        width: 100%;
+        margin: 0;
+    }
+    .parent {
+        width: 100%;
+        height: 300px;
+    }
     h1 { white-space: nowrap; }
 </style>
-<h1>Say the magic words,<br/> Fat Gandalf.</h1>
+
+<div class="parent">
+    <h1>Radagast the Brown</h1>
+</div>
+
+<script type="text/javascript" src="responsive-text.js"></script>
+<script type="text/javascript">
+    var element = document.querySelector('h1');
+    new responsiveText(element, {
+        unit: 'vw',
+    }).init();
+</script>
+```
+### Autoresizing text with resize event
+`px` is the default unit and with a resize event it is a little more reliable.
+```html
+<style>
+    html,body {
+        width: 100%;
+        margin: 0;
+    }
+    .parent {
+        width: 100%;
+        height: 300px;
+    }
+    h1 { white-space: nowrap; }
+</style>
+
+<div class="parent">
+    <h1>Saruman the White</h1>
+</div>
 <script type="text/javascript" src="responsive-text.js"></script>
 <script type="text/javascript">
     var element = document.querySelector('h1');
@@ -73,23 +117,20 @@ Default: `-6`
 A custom comparator used to test if the guessed font-size is correct.
 Example:
 ```JavaScript
-(guess, min, max) => {
-    guess = guess / divider;
+(currentSize, targetSize, guess) => {
+    // Compare the current size with the target size
+    const isWidthExact = currentSize.width === targetSize.width;
+    const isWidthLess = currentSize.width < targetSize.width;
+    const isHeightExact = currentSize.height === targetSize.height;
+    const isHeightLess = currentSize.height < targetSize.height;
     
-    element.style.fontSize = guess + 'vw';
-
-    // Let the font-size set the size of the element
-    // then return the new width of the element
-    let currentElementWidth = getCurrentElementWidth(); 
-
-    // if the current element width is equal to the target width
-    // we've found the correct font-size.
-    // If not, test if the current size is too big or too small
-    if(currentElementWidth === targetElementWidth) {
+    // Check if we found the exact correct font-size
+    if (isWidthExact && isHeightExact) {
         return 1;
-    } else {
-        return currentElementWidth < targetElementWidth;
     }
+
+    // If not, check if the current size is less than the original
+    return isWidthLess && isHeightLess;
 }
 ```
 Default: `null`
@@ -99,3 +140,6 @@ Default: `true`
 ### checkWidth
 If the width of the element should be considered.
 Default: `true`
+### callback
+A function that is called when the calculation is done
+Default: `function() {}`

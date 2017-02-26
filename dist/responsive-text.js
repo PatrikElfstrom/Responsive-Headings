@@ -1,3 +1,5 @@
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -5,7 +7,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 (function (root, factory) {
     root.responsiveText = factory();
 })(this, function () {
-
     var defaultOptions = {
         unit: 'px',
         targetSize: {},
@@ -15,7 +16,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         length: -6,
         comparator: null,
         checkHeight: true,
-        checkWidth: true
+        checkWidth: true,
+        callback: function callback() {}
     };
 
     var responsiveText = function () {
@@ -29,26 +31,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         function responsiveText(elements, options) {
             _classCallCheck(this, responsiveText);
 
-            this.options = Object.assign({}, defaultOptions, options);
-            this.elements = elements;
+            this._options = _extends({}, defaultOptions, options);
+            this._elements = elements;
         }
 
         /**
-         * Initiate responsiveText
+         * Getters
          */
 
 
         _createClass(responsiveText, [{
             key: 'init',
+
+
+            /**
+             * Initiate responsiveText
+             */
             value: function init() {
                 if (this.elements.length) {
-
                     for (var i = 0; i < this.elements.length; i++) {
-
-                        this.responsiveText(this.elements[i]);
+                        this.main(this.elements[i]);
                     }
                 } else {
-                    this.responsiveText(this.elements);
+                    this.main(this.elements);
                 }
             }
 
@@ -59,96 +64,113 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
              */
 
         }, {
-            key: 'responsiveText',
-            value: function responsiveText(element) {
-                var _this = this;
+            key: 'main',
+            value: function main(element) {
+                this.element = element;
 
-                var fontSize = void 0,
-                    target = void 0;
-
-                // Get the max size of the element
-                if (this.options.targetSize.hasOwnProperty('width') && this.options.targetSize.hasOwnProperty('height')) {
-                    target = this.options.targetSize;
+                // Set the target size of the element
+                if (Object.prototype.hasOwnProperty.call(this.options.targetSize, 'width') && Object.prototype.hasOwnProperty.call(this.options.targetSize, 'height')) {
+                    this.targetSize = this.options.targetSize;
                 } else {
-                    target = this.getTargetSize(element);
+                    this.targetSize = responsiveText.getTargetSize(element);
                 }
 
-                this.binarySearch(function (guess) {
-                    // We divide the guess since we don't need such a large font-size and we want some decimal places
-                    guess = guess / _this.options.divider;
+                // Do the main calculation
+                var guess = responsiveText.binarySearch(this.comparator.bind(this), this.options.max, this.options.min);
 
-                    // Floor guess to X decimals
-                    fontSize = _this.floor10(guess, _this.options.length);
-
-                    // Set the new fontSize
-                    element.style.fontSize = fontSize + _this.options.unit;
-
-                    // Get the size of the element with the new font-size
-                    var absoluteSize = _this.getAbsoluteSize(element);
-
-                    // Custom comparator
-                    if (_this.options.comparator instanceof Function) {
-                        return _this.options.comparator();
-                    } else {
-
-                        var absoluteWidthExact = absoluteSize.width === target.width;
-                        var absoluteWidthLess = absoluteSize.width < target.width;
-                        var absoluteHeightExact = absoluteSize.height === target.height;
-                        var absoluteHeightLess = absoluteSize.height < target.height;
-
-                        // Only check width 
-                        if (_this.options.checkWidth === true && _this.options.checkHeight === false) {
-
-                            // Check if we found the exact correct font-size
-                            if (absoluteWidthExact) {
-                                return 1;
-                            }
-
-                            // If not, check if the new size is less than the original
-                            else {
-                                    return absoluteWidthLess;
-                                }
-                        }
-
-                        // Only check height
-                        else if (_this.options.checkWidth === false && _this.options.checkHeight === true) {
-
-                                // Check if we found the exact correct font-size
-                                if (absoluteHeightExact) {
-                                    return 1;
-                                }
-
-                                // If not, check if the new size is less than the original
-                                else {
-                                        return absoluteHeightLess;
-                                    }
-                            }
-
-                            // Check both width and height
-                            else {
-
-                                    // Check if we found the exact correct font-size
-                                    if (absoluteWidthExact && absoluteHeightExact) {
-                                        return 1;
-                                    }
-
-                                    // If not, check if the new size is less than the original
-                                    else {
-                                            return absoluteWidthLess && absoluteHeightLess;
-                                        }
-                                }
-                    }
-                });
+                // Convert the final guess to font-size
+                var fontSize = this.guessToFontSize(guess);
 
                 // Set the final font-size
-                element.style.fontSize = fontSize + this.options.unit;
+                element.style.fontSize = fontSize;
 
-                // Dispatch done event with final font-size
-                element.dispatchEvent(new CustomEvent('done', {
-                    detail: {
-                        fontSize: fontSize
+                // Callback
+                this.options.callback(element, fontSize);
+            }
+
+            /**
+             * Comparator function to do the comparison
+             *
+             * @param {int} guess  The current guess
+             * @return {bool, int} Returns true if new size is less than the target size
+             *                     or 1 if exact size was found
+             */
+
+        }, {
+            key: 'comparator',
+            value: function comparator(guess) {
+
+                // Set the new fontSize
+                this.element.style.fontSize = this.guessToFontSize(guess);
+
+                // Get the size of the element with the new font-size
+                var currentSize = responsiveText.getAbsoluteSize(this.element);
+
+                // Use custom comparator
+                if (this.options.comparator instanceof Function) {
+                    return this.options.comparator(currentSize, this.targetSize, guess);
+                }
+
+                // Compare the current size with the target size
+                var isWidthExact = currentSize.width === this.targetSize.width;
+                var isWidthLess = currentSize.width < this.targetSize.width;
+                var isHeightExact = currentSize.height === this.targetSize.height;
+                var isHeightLess = currentSize.height < this.targetSize.height;
+
+                // Only check width
+                if (this.options.checkWidth === true && this.options.checkHeight === false) {
+
+                    // Check if we found the exact correct font-size
+                    if (isWidthExact) {
+                        return 1;
                     }
-                }));
+
+                    // If not, check if the current size is less than the original
+                    return isWidthLess;
+                }
+
+                // Only check height
+                else if (this.options.checkWidth === false && this.options.checkHeight === true) {
+
+                        // Check if we found the exact correct font-size
+                        if (isHeightExact) {
+                            return 1;
+                        }
+
+                        // If not, check if the current size is less than the original
+                        return isHeightLess;
+                    }
+
+                // Check both width and height
+                // Check if we found the exact correct font-size
+                if (isWidthExact && isHeightExact) {
+                    return 1;
+                }
+
+                // If not, check if the current size is less than the original
+                return isWidthLess && isHeightLess;
+            }
+
+            /**
+             * Converts the guess to a usable font-size
+             *
+             * @param {int} guess The current guess
+             * @return {number}         An object with the width and height
+             */
+
+        }, {
+            key: 'guessToFontSize',
+            value: function guessToFontSize(guess) {
+                // We divide the guess to get some decimal places
+                guess /= this.options.divider;
+
+                // Floor guess to X decimals
+                var fontSize = responsiveText.floor10(guess, this.options.length);
+
+                // Add unit
+                fontSize += this.options.unit;
+
+                return fontSize;
             }
 
             /**
@@ -159,6 +181,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
              */
 
         }, {
+            key: 'options',
+            get: function get() {
+                return this._options;
+            }
+        }, {
+            key: 'elements',
+            get: function get() {
+                return this._elements;
+            }
+        }], [{
             key: 'getAbsoluteSize',
             value: function getAbsoluteSize(element) {
                 // Get current position
@@ -220,11 +252,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
 
             /**
-             * Performs a binary search to find a number between min and max and returns the final guess. 
+             * Performs a binary search to find a number
+             * between min and max and returns the final guess.
              * If it can't be found it'll return false.
              * Original from https://github.com/Olical/binary-search
              *
-             * @param  {function} comparator A function to validate whether the guess is smaller than the target
+             * @param  {function} comparator Compare if the guess is smaller than the target
              * @param  {number}   max        The max value to search for
              * @param  {number}   min        The min value to search for
              * @return {number}              Returns the last guess
@@ -233,17 +266,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: 'binarySearch',
             value: function binarySearch() {
-                var comparator = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (guess, min, max) {
+                var comparator = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function (guess) {
                     var target = 0;
 
                     if (guess === target) {
                         return 1;
-                    } else {
-                        return guess < target;
                     }
+
+                    return guess < target;
                 };
-                var max = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.options.max;
-                var min = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.options.min;
+                var max = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10000;
+                var min = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
                 return function () {
                     var guess = void 0;
 
