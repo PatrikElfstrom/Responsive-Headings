@@ -1,13 +1,13 @@
 # Responsive text
 
-A responsive "fittext" script that is calculating the required font size based on the size of the parent element.
+A responsive "fittext" script that is calculating the required font size based on the size of the parent element.  
 Can be used with the viewport width unit so that no resize events have to be used.
 
 ## Download and Install:
 Download [responsive-text.js](https://raw.githubusercontent.com/PatrikElfstrom/responsive-text/master/dist/responsive-text.js) and place responsive-text.js in your project.
 
 ## Usage:
-`white-space: nowrap;` is required for it to work correctly. You can use `<br />` to get line breaks.
+`white-space: nowrap;` is required for it to work correctly. You can use `<br />` to get line breaks.  
 The parent element needs some form of height and width.
 
 ```html
@@ -87,7 +87,7 @@ With the use of the `vw` (or `vh`) unit we can get autoresizing text without the
 
 ## Options
 ### unit
-Define your own font-size unit.
+Define your own font-size unit.  
 Default: `'px'`
 ### targetSize
 Define your own target size.
@@ -98,20 +98,20 @@ Needs to be an object with width and height.
     height: 100
 }
 ```
-Defaults to check the parents size.
+Defaults to check the parents size.  
 Default: `{}`
 ### min
-The minimum binary search range.
+The minimum binary search range.  
 Default: `0`
 ### max
-The maximum binary search range.
+The maximum binary search range.  
 Default: `1000000000`
 ### divider
-How much to divide the guess to get the correct font-size.
+How much to divide the guess to get the correct font-size.  
 Default: `100000`
 ### length
 The float floor exponent (the 10 logarithm of the adjustment base).
-Read more: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round
+Read more: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round  
 Default: `-6`
 ### comparator
 A custom comparator used to test if the guessed font-size is correct.
@@ -135,11 +135,11 @@ Example:
 ```
 Default: `null`
 ### checkHeight
-If the height of the element should be considered.
+If the height of the element should be considered.  
 Default: `true`
 ### checkWidth
-If the width of the element should be considered.
+If the width of the element should be considered.  
 Default: `true`
 ### callback
-A function that is called when the calculation is done
+A function that is called when the calculation is done  
 Default: `function() {}`
